@@ -1,5 +1,8 @@
 import os
+import pickle
+
 from src.huffman import HuffmanCoding
+from src.bit_utils import pad_encoded_text, get_byte_array
 
 
 class FileCompressor:
@@ -16,8 +19,15 @@ class FileCompressor:
 
         encoded_text = self.huffman.encode_text(text)
 
-        with open(output_path, "w") as file:
-            file.write(encoded_text)
+        padded_encoded_text = pad_encoded_text(encoded_text)
+
+        byte_array = get_byte_array(padded_encoded_text)
+
+        with open(output_path, "wb") as output:
+            output.write(bytes(byte_array))
+
+        with open(output_path + ".codes", "wb") as meta:
+            pickle.dump(self.huffman.codes, meta)
 
         original_size = os.path.getsize(input_path)
         compressed_size = os.path.getsize(output_path)
